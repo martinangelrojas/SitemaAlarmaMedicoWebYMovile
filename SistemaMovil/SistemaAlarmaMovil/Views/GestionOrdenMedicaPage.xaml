@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="SistemaAlarmaMovil.Views.GestionOrdenMedicaPage"
+             Title="Orden Médica">
+    <ScrollView>
+        <VerticalStackLayout Spacing="15" Padding="15">
+            <Frame BorderColor="LightGray" Padding="10">
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="Información del Médico" FontAttributes="Bold" FontSize="16"/>
+                    <Label Text="{Binding Orden.Medico.NombreCompleto}" />
+                    <Label Text="{Binding Orden.Medico.Especialidad.Nombre}" />
+                    <Label Text="{Binding Orden.Fecha, StringFormat='Fecha: {0:dd/MM/yyyy}'}" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <Label Text="Tratamientos" FontAttributes="Bold" FontSize="16"/>
+            <CollectionView ItemsSource="{Binding LineasOrdenMedica}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Margin="0,5" BorderColor="LightGray" Padding="10">
+                            <VerticalStackLayout Spacing="5">
+                                <Label Text="{Binding Nombre}" FontAttributes="Bold" />
+                                <Label>
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="Cantidad: " FontAttributes="Bold"/>
+                                            <Span Text="{Binding Cantidad}" />
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                                <Label>
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="Frecuencia: " FontAttributes="Bold"/>
+                                            <Span Text="{Binding FrecuenciaDescripcion}" />
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                                <Label>
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="Obs.: " FontAttributes="Bold"/>
+                                            <Span Text="{Binding Observacion}" />
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                                <Button 
+                                    Text="Empezar Tratamiento"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.EmpezarTratamientoCommand}"
+                                    CommandParameter="{Binding .}"
+                                    VerticalOptions="Center">
+                                    <Button.Triggers>
+                                        <DataTrigger TargetType="Button" 
+                                                    Binding="{Binding UnicaAplicacion}" 
+                                                    Value="True">
+                                            <Setter Property="IsVisible" Value="False" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Button" 
+                                                    Binding="{Binding TratamientoEmpezado}" 
+                                                    Value="True">
+                                            <Setter Property="IsVisible" Value="False" />
+                                        </DataTrigger>
+                                    </Button.Triggers>
+                                </Button>
+
+                                <Label Text="Tratamiento comenzado"
+                                       TextColor="Green"
+                                       FontAttributes="Bold"
+                                       IsVisible="{Binding TratamientoEmpezado}" />
+                            </VerticalStackLayout>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

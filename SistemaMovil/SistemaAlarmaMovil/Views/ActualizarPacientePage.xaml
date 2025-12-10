@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:converters="clr-namespace:SistemaAlarmaMovil.Converters"
+             xmlns:sys="clr-namespace:System;assembly=netstandard"
+             x:Class="SistemaAlarmaMovil.Views.ActualizarPacientePage"
+             Title="Datos Personales">
+    <ContentPage.Resources>
+        <converters:InverseBoolConverter x:Key="InverseBoolConverter"/>
+    </ContentPage.Resources>
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+            <Label Text="Datos Personales" 
+                   FontSize="20" 
+                   FontAttributes="Bold" 
+                   HorizontalOptions="Center"/>
+            
+            <Frame BorderColor="LightGray" 
+                   CornerRadius="10" 
+                   Padding="15">
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="Apellido"/>
+                    <Entry x:Name="txtApellido" 
+                           Placeholder="Ingrese su apellido"/>
+                    
+                    <Label Text="Nombre"/>
+                    <Entry x:Name="txtNombre" 
+                           Placeholder="Ingrese su nombre"/>
+                    
+                    <Label Text="Documento"/>
+                    <Entry x:Name="txtDocumento" 
+                           Placeholder="Ingrese su documento"
+                           Keyboard="Numeric"/>
+                    
+                    <Label Text="Fecha de Nacimiento"/>
+                    <DatePicker x:Name="dpFechaNacimiento"
+                               Format="dd/MM/yyyy"
+                               MaximumDate="{Binding Source={x:Static sys:DateTime.Now}}"/>
+                    
+                    <Label Text="Email"/>
+                    <Entry x:Name="txtEmail" 
+                           Placeholder="Ingrese su email"
+                           Keyboard="Email"
+                           IsReadOnly="True"/>
+                </VerticalStackLayout> 
+            </Frame>
+
+            <Button x:Name="btnGuardar" 
+                    Text="Guardar" 
+                    HorizontalOptions="Fill"
+                    Clicked="OnGuardarClicked"/>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
