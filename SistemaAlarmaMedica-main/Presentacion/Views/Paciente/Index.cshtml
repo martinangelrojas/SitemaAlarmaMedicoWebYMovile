@@ -1,0 +1,166 @@
+﻿@model PacienteViewModel
+@{
+    ViewData["Title"] = "Pacientes";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row px-xl-5">
+        <div class="col">
+            <h5 class="section-title position-relative text-uppercase mb-3"><span class="bg-secondary pr-3">Lista de Pacientes</span></h5>
+        </div>
+    </div>
+    <div class="row px-xl-5 mb-1 justify-content-end">
+        <div class="col">
+            <div class="input-group">
+                <input type="text" id="searchText" class="form-control" placeholder="Buscar por Documento">
+                <div class="input-group-append">
+                    <span id="searchInput" class="input-group-text bg-transparent text-primary">
+                        <i class="fa fa-search"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+        @if (Model.TipoUsuario != Presentacion.Core.DTOs.TipoUsuarioDto.MEDICO)
+        {
+            <div class="col-auto">
+                <a class="btn btn-primary px-3" asp-area="" asp-controller="Paciente" asp-action="GestionarPaciente"><i class="fa fa-plus"></i> Nuevo</a>
+            </div>
+        }
+    </div>
+    <div class="row px-xl-5">
+        <div class="col table-responsive mb-5">
+            <div id="searchResults">
+                <table id="pacienteTable" class="table table-light table-borderless table-hover text-center mb-0">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Documento</th>
+                            <th>Apellido</th>
+                            <th>Nombre</th>
+                            @if (Model.TipoUsuario == Presentacion.Core.DTOs.TipoUsuarioDto.MEDICO)
+                            {
+                                <th>Fecha Consulta</th>
+                            }
+                            else if (Model.TipoUsuario == Presentacion.Core.DTOs.TipoUsuarioDto.ADMINISTRADOR)
+                            {
+                                <th>Fecha Nacimiento</th>
+                                <th>Fecha Consulta</th>
+                            }
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody class="align-middle">
+                        @if (Model.PacientesConTurnos != null && Model.PacientesConTurnos.Any())
+                        {
+                            @if (Model.TipoUsuario == Presentacion.Core.DTOs.TipoUsuarioDto.MEDICO)
+                            {
+                                <!-- MÉDICO: Solo muestra Fecha Consulta -->
+                                @foreach (var item in Model.PacientesConTurnos.OrderByDescending(p => p.FechaTurno))
+                                {
+                                    <tr>
+                                        <td class="align-middle">@item.Paciente?.Documento</td>
+                                        <td class="align-middle">@item.Paciente?.Apellido</td>
+                                        <td class="align-middle">@item.Paciente?.Nombre</td>
+                                        <td class="align-middle">@item.FechaTurno?.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td class="align-middle">
+                                            <button class="btn btn-sm btn-primary btn-modify-paciente" title="Crear Orden Médica" data-paciente-id="@item.Paciente?.PacienteId" data-turno-id="@item.TurnoId"><i class="fas fa-edit"></i></button>
+                                            <button class="btn btn-sm btn-danger btn-delete-paciente" title="Eliminar" data-paciente-id="@item.Paciente?.PacienteId" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else if (Model.TipoUsuario == Presentacion.Core.DTOs.TipoUsuarioDto.ADMINISTRADOR)
+                            {
+                                <!-- ADMINISTRADOR: Muestra Fecha Nacimiento Y Fecha Consulta -->
+                                @foreach (var item in Model.PacientesConTurnos)
+                                {
+                                    <tr>
+                                        <td class="align-middle">@item.Paciente?.Documento</td>
+                                        <td class="align-middle">@item.Paciente?.Apellido</td>
+                                        <td class="align-middle">@item.Paciente?.Nombre</td>
+                                        <td class="align-middle">@item.Paciente?.FechaNacimiento?.ToString("dd/MM/yyyy")</td>
+                                        <td class="align-middle">@item.FechaTurno?.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td class="align-middle">
+                                            <button class="btn btn-sm btn-primary btn-modify-paciente" title="Editar" data-paciente-id="@item.Paciente?.PacienteId"><i class="fas fa-edit"></i></button>
+                                            <button class="btn btn-sm btn-danger btn-delete-paciente" title="Eliminar" data-paciente-id="@item.Paciente?.PacienteId" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirmar Eliminación</h5>
+                </div>
+                <div class="modal-body">
+                    ¿Está seguro de que desea eliminar este paciente? Esta acción no se puede deshacer.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <form id="deleteForm" method="post" action="/Paciente/Eliminar">
+                        <input type="hidden" name="pacienteId" id="pacienteIdToDelete" />
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        ConfigDataTableGlobal("pacienteTable");
+
+        $("#searchInput").on("click", function () {
+            var searchQuery = $("#searchText").val();
+            var redirectUrl = "/Paciente/Index/?filtro=" + encodeURIComponent(searchQuery);
+            window.location.href = redirectUrl;
+        });
+
+        $('.btn-modify-paciente').on('click', function () {
+            var pacienteId = $(this).data('paciente-id');
+            var turnoId = $(this).data('turno-id');
+
+            // Si es médico, crear orden médica; si es admin, editar paciente
+            var url = '/Paciente/GestionarPaciente/?pacienteId=' + pacienteId + '&tipoOperacion=MODIFICAR';
+
+            // Verificar si estamos en contexto de médico viendo turnos
+            // (si hay turnoId en el botón, es para crear orden médica)
+            if (turnoId) {
+                url = '/OrdenMedica/GestionarOrdenMedica/?pacienteId=' + pacienteId + '&turnoId=' + turnoId + '&tipoOperacion=AGREGAR';
+            }
+
+            window.location.href = url;
+        });
+
+        $(".btn-delete-paciente").on("click", function () {
+            var pacienteId = $(this).data("paciente-id");
+            $("#pacienteIdToDelete").val(pacienteId);
+            $("#deleteModal").modal("show");
+        });
+
+        $(".btn-secondary[data-bs-dismiss='modal']").on("click", function() {
+            $("#deleteModal").modal("hide");
+        });
+
+        @if (Model.RespuestaServidor != null && Model.RespuestaServidor.IsFailure)
+        {
+            <text>
+                showErrorModal(@Html.Raw(Json.Serialize(Model.RespuestaServidor.GetErrorsAsString())));
+            </text>        
+        }
+    });
+</script>
