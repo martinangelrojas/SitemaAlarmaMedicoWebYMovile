@@ -8,7 +8,7 @@ namespace SistemaAlarmaMovil.Common
         private readonly HttpClient _httpClient;
         //private readonly string _baseUrl = "https://10.0.2.2:7131";
         //private readonly string _baseUrl = "http://192.168.0.6:5000";
-        private readonly string _baseUrl = "https://presentacionapi-app-202511081941.mangoriver-de8fe4e4.brazilsouth.azurecontainerapps.io";
+        private readonly string _baseUrl = "https://presentacion-api-app.prouddune-ec458c5b.brazilsouth.azurecontainerapps.io";
         public HttpClientService(HttpClient httpClient)
         {
             _httpClient = httpClient;
